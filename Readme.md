@@ -59,7 +59,23 @@ VMware vCenter
 
 ## Additional functionality
 
+### Search 
+
 Pressing `ctrl+f` will allow a search option (regexp) allowing you to search for specific virtual machine names.
+
+### Power Management
+
+Pressing `ctrl+p` will open a power management ui (press ctrl+c) to exit this menu without making any changes
+
+```
+                    ╔═══Set the power state for this VM════╗                    
+                    ║◉  Power On                           ║                    
+                    ║◯  Power Off                          ║                    
+                    ║◯  Suspend                            ║                    
+                    ║◯  Reset                              ║                    
+                    ║◯  Reboot (guest tools required)      ║                    
+                    ╚══════════════════════════════════════╝    
+```
 
 Feel free to use or get involved.
 

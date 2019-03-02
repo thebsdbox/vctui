@@ -8,6 +8,7 @@ import (
 	"github.com/rivo/tview"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 //MainUI starts up the katbox User Interface
@@ -42,6 +43,8 @@ func MainUI(v []*object.VirtualMachine) error {
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlF:
+			// Search functionality
+
 			// Stop the existing UI
 
 			var subset []*object.VirtualMachine
@@ -51,6 +54,44 @@ func MainUI(v []*object.VirtualMachine) error {
 			newRoot := buildTree(subset)
 			root.ClearChildren()
 			root.SetChildren(newRoot.GetChildren())
+
+		case tcell.KeyCtrlP:
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			// Power managment
+			var action int
+			//Stop existing UI
+			application.Suspend(func() { action = powerui() })
+			uiBugFix()
+
+			var vm *object.VirtualMachine
+
+			for i := range v {
+				if v[i].Name() == tree.GetCurrentNode().GetReference() {
+					vm = v[i]
+				}
+			}
+
+			if vm == nil {
+				return nil
+			}
+
+			switch action {
+			case powerOn:
+				vm.PowerOn(ctx)
+
+			case powerOff:
+				vm.PowerOff(ctx)
+
+			case suspend:
+				vm.Suspend(ctx)
+
+			case reset:
+				vm.Reset(ctx)
+
+			}
 		default:
 			return event
 		}
@@ -73,7 +114,7 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 	// Begin the UI Tree
 	rootDir := "VMware vCenter"
 	root := tview.NewTreeNode(rootDir).
-		SetColor(tcell.ColorRed)
+		SetColor(tcell.ColorBlue)
 
 		// reference is used to label the type of tree Node
 	var reference string
@@ -81,16 +122,15 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 	// Add Github articles to the tree
 	reference = "Virtual Machines"
 	vmNode := tview.NewTreeNode("VMs").SetReference(reference).SetSelectable(true)
-	vmNode.SetColor(tcell.ColorGreen)
+	vmNode.SetColor(tcell.ColorYellow)
 
 	// Add Github articles to the tree
 	reference = "Templates"
 	templateNode := tview.NewTreeNode("Templates").SetReference(reference).SetSelectable(true)
-	templateNode.SetColor(tcell.ColorGreen)
+	templateNode.SetColor(tcell.ColorYellow)
 
 	for x := range v {
-		vmChildNode := tview.NewTreeNode(v[x].Name()).SetReference(reference).SetSelectable(true).SetExpanded(false)
-		vmChildNode.SetColor(tcell.ColorBlue)
+		vmChildNode := tview.NewTreeNode(v[x].Name()).SetReference(v[x].Name()).SetSelectable(true).SetExpanded(false)
 
 		// Retrieve the managed object (using the summary string)
 		var o mo.VirtualMachine
@@ -99,7 +139,21 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 		if err != nil {
 			break
 		}
+		powerstate, err := v[x].PowerState(ctx)
+		if err != nil {
+			vmChildNode.SetColor(tcell.ColorGray)
+		}
+		switch powerstate {
+		case types.VirtualMachinePowerStatePoweredOff:
+			vmChildNode.SetColor(tcell.ColorRed)
 
+		case types.VirtualMachinePowerStatePoweredOn:
+			vmChildNode.SetColor(tcell.ColorGreen)
+
+		case types.VirtualMachinePowerStateSuspended:
+			vmChildNode.SetColor(tcell.ColorGray)
+
+		}
 		vmDetails := buildDetails(ctx, v[x], o)
 		vmChildNode.AddChild(vmDetails)
 
@@ -127,6 +181,9 @@ func buildDetails(ctx context.Context, vm *object.VirtualMachine, vmo mo.Virtual
 	vmDetail = tview.NewTreeNode(fmt.Sprintf("Memory: %d", vmo.Summary.Config.MemorySizeMB)).SetReference("memory").SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("Type: %s", vmo.Summary.Guest.GuestFullName)).SetReference("memory").SetSelectable(true)
+	vmDetails.AddChild(vmDetail)
+
 	vmDetail = tview.NewTreeNode(fmt.Sprintf("VMware Tools: %s", vmo.Summary.Guest.ToolsRunningStatus)).SetReference("toolsStatus").SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
@@ -135,29 +192,8 @@ func buildDetails(ctx context.Context, vm *object.VirtualMachine, vmo mo.Virtual
 
 	devices, _ := vm.Device(ctx)
 
-	//for _, device := range devices {
-
 	vmDetail = tview.NewTreeNode(fmt.Sprintf("MAC ADDRESS: %s", devices.PrimaryMacAddress())).SetReference("toolsStatus").SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
-	//		device.GetVirtualDevice().
-	//}
-	// if v.Config != nil {
 
-	// 	if len(v.Config.Hardware.Device) != 0 {
-	// 		for x := range v.Config.Hardware.Device {
-	// 			if nic, ok := v.Config.Hardware.Device[x].(types.BaseVirtualEthernetCard); ok {
-	// 				mac := nic.GetVirtualEthernetCard().MacAddress
-	// 				if mac != "" {
-	// 					vmDetail = tview.NewTreeNode(fmt.Sprintf("MAC ADDRESS: %s", mac)).SetReference("toolsStatus").SetSelectable(true)
-	// 					vmDetails.AddChild(vmDetail)
-	// 					//return false
-	// 				}
-	// 				//				macs[mac] = nil
-	// 				//				eths[devices.Name(d)] = mac
-	// 			}
-	// 		}
-	// 	}
-	// } else {
-	// }
 	return vmDetails
 }
