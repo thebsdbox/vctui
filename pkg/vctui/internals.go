@@ -19,6 +19,8 @@ type vcInternal struct {
 	resourcePool *object.ResourcePool
 }
 
+var vmTypes = []string{"win", "linux"}
+
 func (i *vcInternal) parseInternals(c *govmomi.Client) error {
 
 	ctx, cancel := context.WithCancel(context.Background())

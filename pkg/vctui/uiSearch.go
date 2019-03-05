@@ -8,7 +8,7 @@ import (
 )
 
 //SearchUI - this will provide a user interface for finding articles based upon a keyword entered in the UI
-func SearchUI(v []*object.VirtualMachine) []*object.VirtualMachine {
+func SearchUI(v []*object.VirtualMachine) (string, []*object.VirtualMachine) {
 
 	uiBugFix()
 
@@ -29,22 +29,30 @@ func SearchUI(v []*object.VirtualMachine) []*object.VirtualMachine {
 
 		searchString := form.GetFormItemByLabel(label).(*tview.InputField).GetText()
 
-		var newVMList []*object.VirtualMachine
-		var err error
-		for x := range v {
-			matched, err := regexp.MatchString(searchString, v[x].Name())
-			if err != nil {
-				break
-			}
-			// If the regex matches then add it to the new subset
-			if matched == true {
-				newVMList = append(newVMList, v[x])
-			}
-		}
-
+		newVMs, err := searchVMS(searchString, v)
 		if err == nil {
-			return newVMList
+			return searchString, newVMs
 		}
 		title = err.Error()
 	}
+}
+
+func searchVMS(searchString string, v []*object.VirtualMachine) ([]*object.VirtualMachine, error) {
+
+	var newVMList []*object.VirtualMachine
+	var err error
+	for x := range v {
+		matched, err := regexp.MatchString(searchString, v[x].Name())
+		if err != nil {
+			break
+		}
+		// If the regex matches then add it to the new subset
+		if matched == true {
+			newVMList = append(newVMList, v[x])
+		}
+	}
+	if err == nil {
+		return newVMList, nil
+	}
+	return nil, err
 }
