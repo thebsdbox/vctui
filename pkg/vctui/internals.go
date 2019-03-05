@@ -3,6 +3,8 @@ package vctui
 import (
 	"context"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -60,7 +62,7 @@ func (i *vcInternal) parseInternals(c *govmomi.Client) error {
 }
 
 //VMInventory will create an inventory
-func VMInventory(c *govmomi.Client) ([]*object.VirtualMachine, error) {
+func VMInventory(c *govmomi.Client, sortVMs bool) ([]*object.VirtualMachine, error) {
 
 	ctx := context.Background()
 
@@ -80,6 +82,19 @@ func VMInventory(c *govmomi.Client) ([]*object.VirtualMachine, error) {
 	f.SetDatacenter(dc)
 
 	vms, err := f.VirtualMachineList(ctx, "*")
+
+	if sortVMs == true {
+		// Sort function to sort by name
+		sort.Slice(vms, func(i, j int) bool {
+			switch strings.Compare(vms[i].Name(), vms[j].Name()) {
+			case -1:
+				return true
+			case 1:
+				return false
+			}
+			return vms[i].Name() > vms[j].Name()
+		})
+	}
 
 	return vms, nil
 }

@@ -77,6 +77,14 @@ Pressing `ctrl+p` will open a power management ui (press ctrl+c) to exit this me
                     ╚══════════════════════════════════════╝    
 ```
 
+### Snapshot
+
+Pressing `ctrl+s` on one of the listed snapshots will revert the virtual machine to that snapshot, and it will be left in the powered off state
+
+### Refreshing Virtual Machines
+
+Pressing `ctrl+r` will refresh the state of all virtual machines in the VMware vCenter inventory
+
 Feel free to use or get involved.
 
 @thebsdbox
