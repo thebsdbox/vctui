@@ -76,7 +76,7 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			if r.objectType == "template" {
 				application.Suspend(func() { newVMFromTemplate(tree.GetCurrentNode().GetText()) })
 			} else {
-				application.Suspend(func() { newVM() })
+				application.Suspend(func() { newVM(c) })
 			}
 			uiBugFix()
 		case tcell.KeyCtrlP:
