@@ -15,28 +15,28 @@ import (
 func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	// reference is used to label the type of tree Node
+	var r reference
+
 	// Begin the UI Tree
 	rootDir := "VMware vCenter"
 	root := tview.NewTreeNode(rootDir).
-		SetColor(tcell.ColorBlue)
-
-		// reference is used to label the type of tree Node
-	var r reference
-	r.objectType = "Virtual Machines"
+		SetColor(tcell.ColorBlue).SetReference(r)
 
 	// Add Github articles to the tree
 	vmNode := tview.NewTreeNode("VMs").SetReference(r).SetSelectable(true)
 	vmNode.SetColor(tcell.ColorYellow)
 
 	// Add Github articles to the tree
-	r.objectType = "Templates"
 	templateNode := tview.NewTreeNode("Templates").SetReference(r).SetSelectable(true)
 	templateNode.SetColor(tcell.ColorYellow)
 
 	for x := range v {
 		// Set the reference to point back to the VM object
 		r.vm = v[x]
-		vmChildNode := tview.NewTreeNode(v[x].Name()).SetReference(r).SetSelectable(true).SetExpanded(false)
+		// Create the Virtual Machine child node
+		vmChildNode := tview.NewTreeNode(v[x].Name()).SetSelectable(true).SetExpanded(false)
 
 		// Retrieve the managed object (using the summary string)
 		var o mo.VirtualMachine
@@ -61,14 +61,22 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 			vmChildNode.SetColor(tcell.ColorGray)
 
 		}
+
+		// Build out the details of the virtual machine
 		vmDetails := buildDetails(ctx, v[x], o)
 		vmSnapshots := buildSnapshots(ctx, v[x], o)
+		// Add as child nodes to the virtual machine node
 		vmChildNode.AddChild(vmDetails)
 		vmChildNode.AddChild(vmSnapshots)
 
+		// Set the object type and pin the reference to the new node
 		if o.Summary.Config.Template == true {
+			r.objectType = "template"
+			vmChildNode.SetReference(r)
 			templateNode.AddChild(vmChildNode)
 		} else {
+			r.objectType = "Virtual Machines"
+			vmChildNode.SetReference(r)
 			vmNode.AddChild(vmChildNode)
 		}
 	}

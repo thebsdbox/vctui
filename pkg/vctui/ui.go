@@ -6,11 +6,13 @@ import (
 
 	"github.com/vmware/govmomi"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/vmware/govmomi/object"
 )
+
+// searchString is the filter that is applied to listed virtual machines
+var searchString string
 
 //MainUI starts up the katbox User Interface
 func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
@@ -61,13 +63,22 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 			var subset []*object.VirtualMachine
 			// Stop the existing UI
-			application.Suspend(func() { subset = SearchUI(v) })
+			application.Suspend(func() { searchString, subset = SearchUI(v) })
 			uiBugFix()
 			// Get new tree
 			newRoot := buildTree(subset)
 			root.ClearChildren()
 			root.SetChildren(newRoot.GetChildren())
+		case tcell.KeyCtrlN:
+			// New Virtual Machine functionality
+			r := tree.GetCurrentNode().GetReference().(reference)
 
+			if r.objectType == "template" {
+				application.Suspend(func() { newVMFromTemplate(tree.GetCurrentNode().GetText()) })
+			} else {
+				application.Suspend(func() { newVM() })
+			}
+			uiBugFix()
 		case tcell.KeyCtrlP:
 
 			// Power managment
@@ -102,9 +113,22 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			// Refresh Virtual Machines
 			v, err := VMInventory(c, true)
 			if err != nil {
-				log.Errorf("%s", err)
+				// Throw Error UI
+				application.Suspend(func() { errorUI(err) })
+				uiBugFix()
 			}
-			newRoot := buildTree(v)
+			var newRoot *tview.TreeNode
+			if searchString != "" {
+				filteredVMs, err := searchVMS(searchString, v)
+				if err != nil {
+					// Throw Error UI
+					application.Suspend(func() { errorUI(err) })
+					uiBugFix()
+				}
+				newRoot = buildTree(filteredVMs)
+			} else {
+				newRoot = buildTree(v)
+			}
 			root.ClearChildren()
 			root.SetChildren(newRoot.GetChildren())
 
@@ -117,7 +141,8 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 					_, err := r.vm.RevertToSnapshot(ctx, snapshot, true)
 					if err != nil {
 						// Throw Error UI
-						log.Errorf("%v", err)
+						application.Suspend(func() { errorUI(err) })
+						uiBugFix()
 					}
 				}
 			}
