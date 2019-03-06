@@ -22,7 +22,7 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 	// Begin the UI Tree
 	rootDir := "VMware vCenter"
 	root := tview.NewTreeNode(rootDir).
-		SetColor(tcell.ColorBlue).SetReference(r)
+		SetColor(tcell.ColorWhite).SetReference(r)
 
 	// Add Github articles to the tree
 	vmNode := tview.NewTreeNode("VMs").SetReference(r).SetSelectable(true)
