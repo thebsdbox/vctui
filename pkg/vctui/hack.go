@@ -1,8 +1,6 @@
 package vctui
 
 import (
-	"fmt"
-
 	"github.com/micmonay/keybd_event"
 )
 
@@ -19,5 +17,5 @@ func uiBugFix() {
 
 	//launch
 	kb.Launching()
-	fmt.Printf("\033[2J")
+	//fmt.Printf("\033[2J")
 }

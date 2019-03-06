@@ -58,6 +58,13 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 	tree.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		case tcell.KeyCtrlD:
+			// Delete functionality
+			r := tree.GetCurrentNode().GetReference().(reference)
+			// Check that the node has a virtual machine associated with it
+			if r.vm != nil {
+				r.vm.Destroy(ctx)
+			}
 		case tcell.KeyCtrlF:
 			// Search functionality
 
@@ -67,8 +74,14 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			uiBugFix()
 			// Get new tree
 			newRoot := buildTree(subset)
+			if searchString == "" {
+				root.SetText("VMware vCenter")
+			} else {
+				root.SetText(fmt.Sprintf("VMware vCenter (filter: %s)", searchString))
+			}
 			root.ClearChildren()
 			root.SetChildren(newRoot.GetChildren())
+
 		case tcell.KeyCtrlN:
 			// New Virtual Machine functionality
 			r := tree.GetCurrentNode().GetReference().(reference)

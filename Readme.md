@@ -59,6 +59,15 @@ VMware vCenter
 
 ## Additional functionality
 
+
+### Create New Virtual Machine
+
+Pressing `ctrl+n` will open a new screen allowing you to create a new virtual machine, the datastore and network dropdowns will populate once a host has been chosen.
+
+### Deleting a Virtual Machine
+
+Select the Virtual Machine and press `ctrl+d` WARNING, there will be no alert and the machine will be instantly deleted (VM has to be powered off)
+
 ### Search 
 
 Pressing `ctrl+f` will allow a search option (regexp) allowing you to search for specific virtual machine names.
