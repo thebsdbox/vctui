@@ -125,7 +125,7 @@ func hostInventory(c *govmomi.Client) (hss []mo.HostSystem, err error) {
 
 	defer v.Destroy(ctx)
 
-	err = v.Retrieve(ctx, []string{"HostSystem"}, []string{"summary"}, &hss)
+	err = v.Retrieve(ctx, []string{"HostSystem"}, nil, &hss)
 	return
 }
 
