@@ -89,27 +89,39 @@ func buildTree(v []*object.VirtualMachine) *tview.TreeNode {
 
 func buildDetails(ctx context.Context, vm *object.VirtualMachine, vmo mo.VirtualMachine) *tview.TreeNode {
 
+	// reference is used to label the type of tree Node
+	var r reference
+	r.vm = vm
 	// Add Details subtree information
-	vmDetails := tview.NewTreeNode("Details").SetReference("Details").SetSelectable(true)
+	r.objectType = "Details"
+	vmDetails := tview.NewTreeNode("Details").SetReference(r).SetSelectable(true)
 
-	vmDetail := tview.NewTreeNode(fmt.Sprintf("CPUs: %d", vmo.Summary.Config.NumCpu)).SetReference("Cpu").SetSelectable(true)
+	r.objectType = "CPUs"
+	vmDetail := tview.NewTreeNode(fmt.Sprintf("CPUs: %d", vmo.Summary.Config.NumCpu)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
-	vmDetail = tview.NewTreeNode(fmt.Sprintf("Memory: %d", vmo.Summary.Config.MemorySizeMB)).SetReference("memory").SetSelectable(true)
+	r.objectType = "Memory"
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("Memory: %d", vmo.Summary.Config.MemorySizeMB)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
-	vmDetail = tview.NewTreeNode(fmt.Sprintf("Type: %s", vmo.Summary.Config.GuestFullName)).SetReference("memory").SetSelectable(true)
+	r.objectType = "VM Type"
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("Type: %s", vmo.Summary.Config.GuestFullName)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
-	vmDetail = tview.NewTreeNode(fmt.Sprintf("VMware Tools: %s", vmo.Summary.Guest.ToolsStatus)).SetReference("toolsStatus").SetSelectable(true)
+	r.objectType = "VM Tools"
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("VMware Tools: %s", vmo.Summary.Guest.ToolsStatus)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
-	vmDetail = tview.NewTreeNode(fmt.Sprintf("VM IP Address: %s", vmo.Summary.Guest.IpAddress)).SetReference("toolsStatus").SetSelectable(true)
+	r.objectType = "VM Address"
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("VM IP Address: %s", vmo.Summary.Guest.IpAddress)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
 	devices, _ := vm.Device(ctx)
 
-	vmDetail = tview.NewTreeNode(fmt.Sprintf("MAC ADDRESS: %s", devices.PrimaryMacAddress())).SetReference("toolsStatus").SetSelectable(true)
+	r.objectType = "MAC"
+	r.objectDetails = devices.PrimaryMacAddress()
+
+	vmDetail = tview.NewTreeNode(fmt.Sprintf("MAC ADDRESS: %s", r.objectDetails)).SetReference(r).SetSelectable(true)
 	vmDetails.AddChild(vmDetail)
 
 	return vmDetails

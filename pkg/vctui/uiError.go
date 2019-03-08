@@ -8,7 +8,7 @@ func errorUI(err error) {
 	button := tview.NewButton(err.Error()).SetSelectedFunc(func() {
 		app.Stop()
 	})
-	button.SetBorder(true).SetRect(5, 5, 22, 3)
+	button.SetBorder(true).SetRect(5, 5, 75, 3)
 	if err := app.SetRoot(button, false).Run(); err != nil {
 		panic(err)
 	}

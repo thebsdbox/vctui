@@ -86,6 +86,28 @@ Pressing `ctrl+p` will open a power management ui (press ctrl+c) to exit this me
                     ╚══════════════════════════════════════╝    
 ```
 
+### Installation / Deployment
+
+This requires a `plunder` server up and running and accessible from where `vctui` is currently running. Navigate to the MAC address of a newly created virtual machine, and press `ctrl+i`. This will present a new menu for configuring the settings of a newly deployed OS through plunder. 
+
+```
+     ╔════════════════════Update deployment═════════════════════╗
+     ║                                                          ║
+     ║ Plunder Address http://localhost                         ║
+     ║                                                          ║
+     ║ MAC Address     00:50:56:9b:2a:b7                        ║
+     ║                                                          ║
+     ║ Hostname        server09                                 ║
+     ║                                                          ║
+     ║ IP Address      192.168.1.3                              ║
+     ║                                                          ║
+     ║ Deployment Type preseed                                  ║
+     ║                                                          ║
+     ║   Save Settings                                          ║
+     ║                                                          ║
+     ╚══════════════════════════════════════════════════════════╝
+```
+
 ### Snapshot
 
 Pressing `ctrl+s` on one of the listed snapshots will revert the virtual machine to that snapshot, and it will be left in the powered off state
