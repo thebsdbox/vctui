@@ -48,7 +48,9 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 	// This section handles all of the input from the end-user
 	//
+	// Ctrl+d = delete function
 	// Ctrl+f = Find function
+	// Ctrl+i = deploy/install function
 	// Ctrl+p = Power function
 	// Ctrl+r = Refresh function
 	// Ctrl+s = Snapshot function
@@ -81,6 +83,23 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			}
 			root.ClearChildren()
 			root.SetChildren(newRoot.GetChildren())
+
+		case tcell.KeyCtrlI:
+
+			n := tree.GetCurrentNode()
+			var address, hostname string
+
+			n.Walk(func(node, parent *tview.TreeNode) bool {
+				r := node.GetReference().(reference)
+				if r.objectType == "MAC" {
+					address = r.objectDetails
+					hostname = r.vm.Name()
+					application.Suspend(func() { deployOnVM(address, hostname) })
+					return false
+				}
+				return true
+			})
+			uiBugFix()
 
 		case tcell.KeyCtrlN:
 			// New Virtual Machine functionality

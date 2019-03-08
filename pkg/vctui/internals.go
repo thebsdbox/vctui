@@ -25,12 +25,6 @@ type vcInternal struct {
 	resourcePool  *object.ResourcePool
 }
 
-var vmTypes = []string{"otherLinux64Guest",
-	"Red Hat Enterprise Linux 6 (64-bit)",
-	"Red Hat Enterprise Linux 6 (32-bit)",
-	"Red Hat Enterprise Linux 7 (64-bit)",
-	"Red Hat Enterprise Linux 7 (32-bit)"}
-
 func (i *vcInternal) parseInternals(c *govmomi.Client) error {
 
 	ctx, cancel := context.WithCancel(context.Background())
