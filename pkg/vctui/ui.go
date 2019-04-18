@@ -90,6 +90,10 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			var address, hostname string
 
 			n.Walk(func(node, parent *tview.TreeNode) bool {
+				// Ensure we don't parse an object with no reference
+				if node.GetReference() == nil {
+					return false
+				}
 				r := node.GetReference().(reference)
 				if r.objectType == "MAC" {
 					address = r.objectDetails

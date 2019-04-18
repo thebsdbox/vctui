@@ -129,10 +129,11 @@ func buildDetails(ctx context.Context, vm *object.VirtualMachine, vmo mo.Virtual
 
 func buildSnapshots(ctx context.Context, vm *object.VirtualMachine, vmo mo.VirtualMachine) *tview.TreeNode {
 	// Add Snapshots subtree information
-	vmSnapshots := tview.NewTreeNode("snapshots").SetReference("snapshots").SetSelectable(true)
 	var r reference
-	r.objectType = "snapshot"
+	r.objectType = "snapshots"
 	r.vm = vm
+	vmSnapshots := tview.NewTreeNode("snapshots").SetReference(r).SetSelectable(true)
+	r.objectType = "snapshot"
 	if vmo.Snapshot != nil {
 		if len(vmo.Snapshot.RootSnapshotList) != 0 {
 			for i := range vmo.Snapshot.RootSnapshotList {
