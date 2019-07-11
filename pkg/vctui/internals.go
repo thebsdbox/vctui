@@ -126,8 +126,6 @@ func hostInventory(c *govmomi.Client) (hss []mo.HostSystem, err error) {
 //VMInventory will create an inventory
 func VMInventory(c *govmomi.Client, sortVMs bool) ([]*object.VirtualMachine, error) {
 
-	ctx := context.Background()
-
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
