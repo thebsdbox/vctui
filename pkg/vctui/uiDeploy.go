@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/plunder-app/plunder/pkg/server"
+	"github.com/plunder-app/plunder/pkg/services"
 	"github.com/rivo/tview"
 )
 
@@ -41,33 +41,32 @@ func deployOnVM(address, hostname string) {
 	_, deployType = form.GetFormItemByLabel("Deployment Type").(*tview.DropDown).GetCurrentOption()
 
 	currentConfig, err := getConfig(plunderURL)
-
 	if err != nil {
 		errorUI(err)
 		return
 	}
 	// Check for existing deployment
 	var updatedExisting bool
-	for i := range currentConfig.Deployments {
-		if currentConfig.Deployments[i].MAC == deployMac {
-			currentConfig.Deployments[i].Deployment = deployType
-			currentConfig.Deployments[i].Config.IPAddress = deployIP
-			currentConfig.Deployments[i].Config.ServerName = deployHost
+	for i := range currentConfig.Configs {
+		if currentConfig.Configs[i].MAC == deployMac {
+			currentConfig.Configs[i].ConfigName = deployType
+			currentConfig.Configs[i].ConfigHost.IPAddress = deployIP
+			currentConfig.Configs[i].ConfigHost.ServerName = deployHost
 			updatedExisting = true
 		}
 	}
 
 	// If we've not updated the existing then it's a new entry
 	if updatedExisting == false {
-		newDeployment := server.DeploymentConfigurations{
+		newDeployment := services.DeploymentConfig{
 			MAC:        deployMac,
-			Deployment: deployType,
-			Config: server.HostConfig{
+			ConfigName: deployType,
+			ConfigHost: services.HostConfig{
 				IPAddress:  deployIP,
 				ServerName: deployHost,
 			},
 		}
-		currentConfig.Deployments = append(currentConfig.Deployments, newDeployment)
+		currentConfig.Configs = append(currentConfig.Configs, newDeployment)
 	}
 
 	// Update the deployment server
@@ -78,7 +77,7 @@ func deployOnVM(address, hostname string) {
 	}
 }
 
-func getConfig(plunderURL string) (*server.DeploymentConfigurationFile, error) {
+func getConfig(plunderURL string) (*services.DeploymentConfigurationFile, error) {
 	u, err := url.Parse(plunderURL)
 	if err != nil {
 		return nil, err
@@ -90,7 +89,7 @@ func getConfig(plunderURL string) (*server.DeploymentConfigurationFile, error) {
 		return nil, err
 	}
 
-	var config server.DeploymentConfigurationFile
+	var config services.DeploymentConfigurationFile
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -103,7 +102,7 @@ func getConfig(plunderURL string) (*server.DeploymentConfigurationFile, error) {
 	return &config, nil
 }
 
-func postConfig(plunderURL string, config *server.DeploymentConfigurationFile) error {
+func postConfig(plunderURL string, config *services.DeploymentConfigurationFile) error {
 	u, err := url.Parse(plunderURL)
 	if err != nil {
 		return err
