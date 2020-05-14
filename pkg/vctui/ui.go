@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/thebsdbox/kuiz/pkg/ui"
 	"github.com/vmware/govmomi"
 
 	"github.com/gdamore/tcell"
@@ -136,36 +135,36 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 			case powerOn:
 				_, err := r.vm.PowerOn(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 			case powerOff:
 				_, err := r.vm.PowerOff(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 			case guestPowerOff:
 				err := r.vm.ShutdownGuest(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 			case guestReboot:
 				err := r.vm.RebootGuest(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 			case suspend:
 				_, err := r.vm.Suspend(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 			case reset:
 				_, err := r.vm.Reset(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 			case netPowerOn:
@@ -173,7 +172,7 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 				devices, err := r.vm.Device(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 				bootOptions := types.VirtualMachineBootOptions{
@@ -182,11 +181,11 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 				err = r.vm.SetBootOptions(ctx, &bootOptions)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 				_, err = r.vm.PowerOn(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 				// Set the boot order back to disk after a three second timeout
@@ -199,7 +198,7 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 					err = r.vm.SetBootOptions(ctx, &bootOptions)
 					if err != nil {
-						ui.ErrorMessage(err)
+						errorUI(err)
 					}
 				})
 
@@ -208,7 +207,7 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 				devices, err := r.vm.Device(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 
 				bootOptions := types.VirtualMachineBootOptions{
@@ -217,11 +216,11 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 				err = r.vm.SetBootOptions(ctx, &bootOptions)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 				_, err = r.vm.PowerOn(ctx)
 				if err != nil {
-					ui.ErrorMessage(err)
+					errorUI(err)
 				}
 			}
 		case tcell.KeyCtrlR:
