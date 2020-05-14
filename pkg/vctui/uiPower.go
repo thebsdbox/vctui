@@ -10,9 +10,12 @@ import (
 const (
 	powerOn = iota
 	powerOff
+	guestPowerOff
+	guestReboot
 	suspend
 	reset
-	reboot
+	netPowerOn
+	diskPowerOn
 )
 
 var cancel bool
@@ -81,11 +84,11 @@ func powerui() int {
 
 	app = tview.NewApplication()
 	cancel = false
-	radioButtons := NewRadioButtons([]string{"Power On", "Power Off", "Suspend", "Reset", "Reboot (guest tools required)"})
+	radioButtons := NewRadioButtons([]string{"Power On", "Power Off", "Guest Power Off (tools required)", "Guest Reboot (tools required)", "Suspend", "Reset", "PXE Boot (one-shot)", "Power On (Disk Boot)"})
 
 	radioButtons.SetBorder(true).
 		SetTitle("Set the power state for this VM").
-		SetRect(20, 8, 40, 7)
+		SetRect(20, 5, 40, 10)
 
 	if err := app.SetRoot(radioButtons, false).Run(); err != nil {
 		panic(err)

@@ -61,8 +61,9 @@ func newVM(c *govmomi.Client) *types.VirtualMachineConfigSpec {
 				}
 			}
 			// Update the Network dropdown with the new array
-			form.GetFormItemByLabel("Network").(*tview.DropDown).SetOptions(networks, nil)
-
+			if form.GetFormItemByLabel("Network") != nil {
+				form.GetFormItemByLabel("Network").(*tview.DropDown).SetOptions(networks, nil)
+			}
 			// Build new datastore array, this matches the references of all datastore to references the host is mapped to
 			for y := range h[optionIndex].Datastore {
 				for i := range d {
@@ -73,7 +74,9 @@ func newVM(c *govmomi.Client) *types.VirtualMachineConfigSpec {
 			}
 
 			//Update the datastore with the new array
-			form.GetFormItemByLabel("Datastore").(*tview.DropDown).SetOptions(datastores, nil)
+			if form.GetFormItemByLabel("Datastore") != nil {
+				form.GetFormItemByLabel("Datastore").(*tview.DropDown).SetOptions(datastores, nil)
+			}
 		}).
 		AddDropDown("Network", networks, 0, nil).
 		AddDropDown("Datastore", datastores, 0, nil).

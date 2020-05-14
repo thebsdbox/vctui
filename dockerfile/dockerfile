@@ -1,6 +1,0 @@
-#Start from Scratch
-FROM scratch
-#Copy binary
-COPY vctui vctui
-#Run binary
-CMD ["./vctui"]

@@ -11,11 +11,14 @@ type reference struct {
 }
 
 var vmTypes = []string{"otherLinux64Guest",
-	"Red Hat Enterprise Linux 6 (64-bit)",
-	"Red Hat Enterprise Linux 6 (32-bit)",
-	"Red Hat Enterprise Linux 7 (64-bit)",
-	"Red Hat Enterprise Linux 7 (32-bit)"}
+	"ubuntu64Guest",
+	"rhel7_64Guest",
+	"vmkernel65Guest",
+	"windows9_64Guest",
+	"vmwarePhoton64Guest"}
 
 var deplopyTypes = []string{"reboot",
 	"preseed",
-	"kickstart"}
+	"kickstart",
+	"pull",
+	"push"}
