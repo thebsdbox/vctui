@@ -10,6 +10,14 @@ Inspired by the time wasted continualy right clicking in the Web UI...
 
 ## To use
 
+Now has a docker image:
+
+Using `-e` to pass in the environment variables defined below.
+
+```
+docker run -it --rm -e VCUSER -e VCPASS thebsdbox/vctui:0.1.0 --address https://Username:password@URL/sdk
+```
+
 VMware vCenter credentials are required and can be specified in a number of ways:
 
 *Flags*
