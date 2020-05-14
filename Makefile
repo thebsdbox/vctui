@@ -1,24 +1,27 @@
 
-SHELL := /bin/bash
+SHELL := /bin/sh
 
 # The name of the executable (default is current directory name)
 TARGET := vctui
 .DEFAULT_GOAL: $(TARGET)
 
 # These will be provided to the target
-VERSION := 1.0.0
+VERSION := 0.1.0
 BUILD := `git rev-parse HEAD`
 
 # Operating System Default (LINUX)
 TARGETOS=linux
 
 # Use linker flags to provide version/build settings to the target
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -s"
+#STATIC flags for (scratch and CGO_Enabled)
+LDFLAGS=-ldflags "-s -w -X=main.Version=$(VERSION) -X=main.Build=$(BUILD) -linkmode external -extldflags '-static'"
 
 # go source files, ignore vendor directory
 SRC = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
-DOCKERTAG=latest
+REPO ?= thebsdbox
+DOCKERREPO ?= $(REPO)
+DOCKERTAG ?= $(VERSION)
 
 .PHONY: all build clean install uninstall fmt simplify check run
 
@@ -43,12 +46,13 @@ uninstall: clean
 fmt:
 	@gofmt -l -w $(SRC)
 
+dockerx86:
+	@docker buildx build  --platform linux/amd64 --load -t $(DOCKERREPO)/$(TARGET):$(DOCKERTAG) -f Dockerfile .
+	@echo New Multi Architecture Docker image created
+
 docker:
-	@GOOS=$(TARGETOS) make build
-	@mv $(TARGET) ./dockerfile
-	@docker build -t $(TARGET):$(DOCKERTAG) ./dockerfile/
-	@rm ./dockerfile/$(TARGET)
-	@echo New Docker image created
+	@docker buildx build  --platform linux/amd64,linux/arm64,linux/arm/v7 --push -t $(DOCKERREPO)/$(TARGET):$(DOCKERTAG) -f Dockerfile .
+	@echo New Multi Architecture Docker image created
 
 simplify:
 	@gofmt -s -l -w $(SRC)

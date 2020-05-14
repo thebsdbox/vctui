@@ -3,12 +3,15 @@ package vctui
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/thebsdbox/kuiz/pkg/ui"
 	"github.com/vmware/govmomi"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // searchString is the filter that is applied to listed virtual machines
@@ -131,19 +134,95 @@ func MainUI(v []*object.VirtualMachine, c *govmomi.Client) error {
 
 			switch action {
 			case powerOn:
-				r.vm.PowerOn(ctx)
+				_, err := r.vm.PowerOn(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
 
 			case powerOff:
-				r.vm.PowerOff(ctx)
+				_, err := r.vm.PowerOff(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+
+			case guestPowerOff:
+				err := r.vm.ShutdownGuest(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+			case guestReboot:
+				err := r.vm.RebootGuest(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
 
 			case suspend:
-				r.vm.Suspend(ctx)
+				_, err := r.vm.Suspend(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
 
 			case reset:
-				r.vm.Reset(ctx)
+				_, err := r.vm.Reset(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
 
-			case reboot:
-				r.vm.RebootGuest(ctx)
+			case netPowerOn:
+				bootOrder := []string{"ethernet", "disk"}
+
+				devices, err := r.vm.Device(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+
+				bootOptions := types.VirtualMachineBootOptions{
+					BootOrder: devices.BootOrder(bootOrder),
+				}
+
+				err = r.vm.SetBootOptions(ctx, &bootOptions)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+				_, err = r.vm.PowerOn(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+
+				// Set the boot order back to disk after a three second timeout
+				time.AfterFunc(3*time.Second, func() {
+					bootOrder = []string{"disk", "ethernet"}
+
+					bootOptions = types.VirtualMachineBootOptions{
+						BootOrder: devices.BootOrder(bootOrder),
+					}
+
+					err = r.vm.SetBootOptions(ctx, &bootOptions)
+					if err != nil {
+						ui.ErrorMessage(err)
+					}
+				})
+
+			case diskPowerOn:
+				bootOrder := []string{"disk", "ethernet"}
+
+				devices, err := r.vm.Device(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+
+				bootOptions := types.VirtualMachineBootOptions{
+					BootOrder: devices.BootOrder(bootOrder),
+				}
+
+				err = r.vm.SetBootOptions(ctx, &bootOptions)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
+				_, err = r.vm.PowerOn(ctx)
+				if err != nil {
+					ui.ErrorMessage(err)
+				}
 			}
 		case tcell.KeyCtrlR:
 			// Refresh Virtual Machines
